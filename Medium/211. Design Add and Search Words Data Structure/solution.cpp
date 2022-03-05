@@ -5,73 +5,62 @@ public:
     }
     
     void addWord(string word) {
-        Character &ch = root;
+        A* ch = root;
+        const char* cs = word.c_str();
         for (int i = 0; i < word.length(); i++) {
-            char c = word[i];
-            auto temp = ch.AddChild(c);
-            cout << ch.child.size() << "(ch)\n";
-            cout << root.child.size() << "(root)\n";
+            char c = *cs++;
+            auto temp = addChild(ch, c);
             ch = temp;
         }
+        addChild(ch, '\0');
     }
     
     bool search(string word) {
-        return root.Find(word.c_str());
+        return find(root, word.c_str());
     }
 
 private:
-    struct Character {
-        public: 
-            char Self;
-            Character(char c) {
-                Self = c;
-            }
-        
-            Character AddChild(char c) { 
-                cout << "AddChild(" << c << "), ch = " << Self << ", child count = " << child.size() << "\n";
-                for (Character ch : child) {
-                    cout << "Child exist..." << ch.Self << "...";
-                    if (ch.Self == c) {
-                        cout << "yes\n";
-                        return ch;
-                    }
-                    cout << "not\n";
-                }
-                auto _ch = Character(c);
-                child.push_back(_ch);
-                cout << child.size() << "\n";
-                return _ch;
-            }
-
-            bool Find(const char* c) {
-                cout << "Find(" << *c << "), " << Self << ", " << child.size() << "\n";
-                bool _dots_flag = false;
-                bool _found_flag = false;
-                if (*c == '.') 
-                    _dots_flag = true;
-                if (*c == '\0')
-                    return true;
-                    
-                for (Character ch : child) {
-                    cout << "for: ch=" << ch.Self << "\n";
-                    if (_dots_flag){
-                        if (ch.Find(c++))
-                            return true;
-                    }
-                    else if (ch.Self == *c) {
-                        if (_dots_flag) {
-                            _found_flag = true;
-                        }
-
-                        return ch.Find(c++);
-                    }
-                }
-                return false;
-            }
-            vector<Character> child;
-        private:
+    struct A {
+        A* next[27] = { NULL };
     };
-    Character root = Character('0');
+    A* root = new A();
+
+    A* addChild(A* ch, char c) {
+        int idx = getIdx(c);
+        if (ch->next[idx] != NULL)
+            return ch->next[idx];
+        A* _ch = new A();
+        ch->next[idx] = _ch;
+        return _ch;
+    }
+
+    bool find(A* ch, const char* c) {
+        if (*c == '.') {
+            for (int i = 0; i < 27; i++) {
+                A* _ch = ch->next[i];
+                if (_ch != NULL && find(_ch, c + 1))
+                    return true;
+            }
+        }
+        else {
+            int idx = getIdx(*c);
+            if (ch->next[idx] != NULL) {
+                if (idx == 26)
+                    return true;
+                return find(ch->next[idx], c + 1);
+            }
+        }
+        return false;
+    }
+
+    int getIdx(const char c) {
+        int idx;
+        idx = (int)c - 97;
+        if (idx == -97)
+            idx = 26;
+        return idx;
+    }
+
 };
 
 /**
