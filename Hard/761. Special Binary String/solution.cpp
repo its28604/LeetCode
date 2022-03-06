@@ -13,16 +13,6 @@ public:
 class Solution {
 public:
     string makeLargestSpecial(string s) {
-        auto subs = tryMakeLargestSpecial(s);
-        auto swap_str = tryMakeLargestSpecial(subs);
-        while (swap_str != subs) {
-            subs = swap_str;
-            swap_str = tryMakeLargestSpecial(subs);
-        }
-        return subs;
-    }
-
-    string tryMakeLargestSpecial(string s) {
         auto subs = getSpecialSubstrings(s);
         string swap_str = s;
         for (int i = 0; i < subs.size() - 1; i++) {
@@ -42,6 +32,8 @@ public:
                 }
             }
         };
+        if (swap_str != s)
+            swap_str = makeLargestSpecial(swap_str);
         return swap_str;
     }
 
